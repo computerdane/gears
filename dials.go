@@ -388,3 +388,7 @@ func load(args ...string) {
 func Load() {
 	load(os.Args...)
 }
+
+func Positionals() []string {
+	return positionals
+}
