@@ -278,6 +278,9 @@ func getValue[T bool | float64 | int | string | []float64 | []int | []string](na
 	if dial.ValueType != valueType {
 		log.Fatalf("Dial '%s' is not of type %s!", name, valueType)
 	}
+	if values[name] == nil {
+		log.Fatalf("Value for '%s' not found!", name)
+	}
 	return values[name].(T)
 }
 
@@ -359,10 +362,18 @@ func load(args ...string) {
 
 	// 2. Environment variables
 	for _, dial := range dials {
+		if dial.ValueType == "floats" ||
+			dial.ValueType == "ints" ||
+			dial.ValueType == "strings" {
+			// TODO: support comma-separated environment variables
+			continue
+		}
 		envVar := toEnvVar(dial.Name)
 		value, exists := os.LookupEnv(envVar)
 		if exists {
-			if err := setStringValue(dial.Name, value); err != nil {
+			if dial.ValueType == "bool" {
+				values[dial.Name] = true
+			} else if err := setStringValue(dial.Name, value); err != nil {
 				log.Fatal(err)
 			}
 		}

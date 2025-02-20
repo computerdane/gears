@@ -423,6 +423,9 @@ func TestLoad(t *testing.T) {
 	if err := Add(&Dial{Name: "my-str", Shorthand: "s", ValueType: "string", DefaultValue: ""}); err != nil {
 		log.Fatal(err)
 	}
+	if err := Add(&Dial{Name: "my-bool", Shorthand: "b", ValueType: "bool"}); err != nil {
+		log.Fatal(err)
+	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -460,6 +463,20 @@ func TestLoad(t *testing.T) {
 	load()
 	if StringValue("my-str") != "env" {
 		t.Error("setting my-str using environment failed")
+	}
+
+	values = make(map[string]any)
+	os.Setenv("MY_BOOL", "1")
+	load()
+	if BoolValue("my-bool") != true {
+		t.Error("setting my-bool using environment failed")
+	}
+
+	values["my-bool"] = false
+	os.Unsetenv("MY_BOOL")
+	load()
+	if BoolValue("my-bool") != false {
+		t.Error("unsetting my-bool using environment failed")
 	}
 
 	// Args
