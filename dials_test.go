@@ -426,6 +426,9 @@ func TestLoad(t *testing.T) {
 	if err := Add(&Dial{Name: "my-bool", Shorthand: "b", ValueType: "bool"}); err != nil {
 		log.Fatal(err)
 	}
+	if err := Add(&Dial{Name: "my-floats", Shorthand: "f", ValueType: "floats", DefaultValue: []float64{}}); err != nil {
+		log.Fatal(err)
+	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -433,7 +436,7 @@ func TestLoad(t *testing.T) {
 	}
 
 	configPath := cwd + "/test.json"
-	config := `{"my-str":"json"}`
+	config := `{"my-str":"json","my-floats":[1.0,2.0]}`
 	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
 		log.Fatal("Failed to write config: ", err)
 	}
@@ -449,6 +452,10 @@ func TestLoad(t *testing.T) {
 	load()
 	if StringValue("my-str") != "json" {
 		t.Error("setting my-str using JSON config failed")
+	}
+	myFloats := FloatValues("my-floats")
+	if myFloats[0] != 1.0 || myFloats[1] != 2.0 {
+		t.Error("setting my-floats using JSON config failed")
 	}
 	AddConfigFile(config2Path)
 	values = make(map[string]any)

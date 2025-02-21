@@ -151,6 +151,55 @@ func setValue(dial *Dial, anyValue any) error {
 	return nil
 }
 
+func setJsonValue(dial *Dial, raw json.RawMessage) error {
+	switch dial.ValueType {
+	case "bool":
+		var value bool
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return fmt.Errorf("JSON value '%s' is not of type bool!", string(raw))
+		}
+		values[dial.Name] = value
+	case "float":
+		var value float64
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return fmt.Errorf("JSON value '%s' is not of type float64!", string(raw))
+		}
+		values[dial.Name] = value
+	case "int":
+		var value int
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return fmt.Errorf("JSON value '%s' is not of type int!", string(raw))
+		}
+		values[dial.Name] = value
+	case "string":
+		var value string
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return fmt.Errorf("JSON value '%s' is not of type string!", string(raw))
+		}
+		values[dial.Name] = value
+	case "floats":
+		var value []float64
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return fmt.Errorf("JSON value '%s' is not of type []float64!", string(raw))
+		}
+		values[dial.Name] = value
+	case "ints":
+		var value []int
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return fmt.Errorf("JSON value '%s' is not of type []int!", string(raw))
+		}
+		values[dial.Name] = value
+	case "strings":
+		var value []string
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return fmt.Errorf("JSON value '%s' is not of type []string!", string(raw))
+		}
+		values[dial.Name] = value
+	}
+
+	return nil
+}
+
 func setStringValue(name string, str string) error {
 	dial, exists := dials[name]
 	if !exists {
@@ -252,17 +301,17 @@ func parseArgs(args ...string) error {
 }
 
 func parseJson(data []byte) error {
-	var config map[string]any
+	var config map[string]json.RawMessage
 	if err := json.Unmarshal(data, &config); err != nil {
 		log.Fatalf("Failed to parse JSON: %s", err)
 	}
 
-	for name, anyValue := range config {
+	for name, raw := range config {
 		dial, exists := dials[name]
 		if !exists {
 			return fmt.Errorf("Invalid JSON: Option '%s' does not exist.", name)
 		}
-		if err := setValue(dial, anyValue); err != nil {
+		if err := setJsonValue(dial, raw); err != nil {
 			return err
 		}
 	}
