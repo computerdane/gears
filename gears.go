@@ -280,6 +280,10 @@ func parseArgs(args ...string) error {
 				return err
 			}
 			needValueForName = ""
+		} else if arg == "-" {
+			// Some programs use "-" to signify that data will be read from
+			// stdin, so we treat it as a positional argument
+			positionals = append(positionals, arg)
 		} else if arg == "--" {
 			// "--" is a special flag that treats all of the remaining
 			// arguments as positional arguments

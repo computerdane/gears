@@ -517,6 +517,15 @@ func TestLoad(t *testing.T) {
 		t.Error("positionals not collected after -- flag")
 	}
 
+	// "-" argument
+	positionals = []string{}
+	load("cmd", "-s", "arg", "-")
+	args = Positionals()
+	if args[0] != "-" {
+		fmt.Println(args[0])
+		t.Error("- is not treated as a positional argument")
+	}
+
 	os.Remove(configPath)
 	os.Remove(config2Path)
 }
