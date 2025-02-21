@@ -18,57 +18,57 @@ func reset() {
 func TestAssertValid(t *testing.T) {
 	// Missing parameters
 	if err := assertValid(&Flag{}); err == nil {
-		t.Error("empty dial is valid; want invalid")
+		t.Error("empty flag is valid; want invalid")
 	}
 	if err := assertValid(&Flag{Name: "test"}); err == nil {
-		t.Error("dial with no ValueType is valid; want invalid")
+		t.Error("flag with no ValueType is valid; want invalid")
 	}
 	if err := assertValid(&Flag{Name: "test", ValueType: "string"}); err == nil {
-		t.Error("string dial with no DefaultValue is valid; want invalid")
+		t.Error("string flag with no DefaultValue is valid; want invalid")
 	}
 
-	// Dial name
+	// flag name
 	if err := assertValid(&Flag{Name: "invalid name 1", ValueType: "bool"}); err == nil {
-		t.Error("dial with name 'invalid name 1' is valid; want invalid")
+		t.Error("flag with name 'invalid name 1' is valid; want invalid")
 	}
 	if err := assertValid(&Flag{Name: "Invalid-name-1", ValueType: "bool"}); err == nil {
-		t.Error("dial with name 'Invalid-name-1' is valid; want invalid")
+		t.Error("flag with name 'Invalid-name-1' is valid; want invalid")
 	}
 	if err := assertValid(&Flag{Name: "valid-name-1", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("dial with name 'valid-name-1' is invalid; want valid")
+		t.Error("flag with name 'valid-name-1' is invalid; want valid")
 	}
 	if err := assertValid(&Flag{Name: "valid", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("dial with name 'valid' is invalid; want valid")
+		t.Error("flag with name 'valid' is invalid; want valid")
 	}
 	if err := assertValid(&Flag{Name: "v", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("dial with name 'v' is invalid; want valid")
+		t.Error("flag with name 'v' is invalid; want valid")
 	}
 	if err := assertValid(&Flag{Name: "1", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("dial with name '1' is invalid; want valid")
+		t.Error("flag with name '1' is invalid; want valid")
 	}
 
-	// Dial shorthand
+	// flag shorthand
 	if err := assertValid(&Flag{Name: "valid-name-1", Shorthand: "vv", ValueType: "bool"}); err == nil {
-		t.Error("dial with shorthand 'vv' is valid; want invalid")
+		t.Error("flag with shorthand 'vv' is valid; want invalid")
 	}
 	if err := assertValid(&Flag{Name: "valid-name-1", Shorthand: " ", ValueType: "bool"}); err == nil {
-		t.Error("dial with shorthand ' ' is valid; want invalid")
+		t.Error("flag with shorthand ' ' is valid; want invalid")
 	}
 	if err := assertValid(&Flag{Name: "valid-name-1", Shorthand: "v", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("dial with shorthand 'v' is invalid; want valid")
+		t.Error("flag with shorthand 'v' is invalid; want valid")
 	}
 	if err := assertValid(&Flag{Name: "valid-name-1", Shorthand: "V", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("dial with shorthand 'V' is invalid; want valid")
+		t.Error("flag with shorthand 'V' is invalid; want valid")
 	}
 	if err := assertValid(&Flag{Name: "valid-name-1", Shorthand: "1", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("dial with shorthand '1' is invalid; want valid")
+		t.Error("flag with shorthand '1' is invalid; want valid")
 	}
 }
 
@@ -76,62 +76,62 @@ func TestAdd(t *testing.T) {
 	// Default values
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "string", DefaultValue: 1}); err == nil {
-		t.Error("string dial with DefaultValue of 1 is valid; want invalid")
+		t.Error("string flag with DefaultValue of 1 is valid; want invalid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "int", DefaultValue: 1.0}); err == nil {
-		t.Error("int dial with DefaultValue of 1.0 is valid; want invalid")
+		t.Error("int flag with DefaultValue of 1.0 is valid; want invalid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "float", DefaultValue: 1}); err == nil {
-		t.Error("float dial with DefaultValue of 1 is valid; want invalid")
+		t.Error("float flag with DefaultValue of 1 is valid; want invalid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "strings", DefaultValue: "value"}); err == nil {
-		t.Error("strings dial with DefaultValue of 'value' is valid; want invalid")
+		t.Error("strings flag with DefaultValue of 'value' is valid; want invalid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "ints", DefaultValue: 1}); err == nil {
-		t.Error("ints dial with DefaultValue of 1 is valid; want invalid")
+		t.Error("ints flag with DefaultValue of 1 is valid; want invalid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "floats", DefaultValue: 1.0}); err == nil {
-		t.Error("floats dial with DefaultValue of 1.0 is valid; want invalid")
+		t.Error("floats flag with DefaultValue of 1.0 is valid; want invalid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
-		t.Error("bool dial with no DefaultValue is invalid; want valid")
+		t.Error("bool flag with no DefaultValue is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "string", DefaultValue: ""}); err != nil {
 		fmt.Println(err)
-		t.Error("string dial with DefaultValue of '' is invalid; want valid")
+		t.Error("string flag with DefaultValue of '' is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "string", DefaultValue: "test value"}); err != nil {
 		fmt.Println(err)
-		t.Error("string dial with DefaultValue of 'test value' is invalid; want valid")
+		t.Error("string flag with DefaultValue of 'test value' is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "int", DefaultValue: 1}); err != nil {
 		fmt.Println(err)
-		t.Error("int dial with DefaultValue of 1 is invalid; want valid")
+		t.Error("int flag with DefaultValue of 1 is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "float", DefaultValue: 1.0}); err != nil {
 		fmt.Println(err)
-		t.Error("float dial with DefaultValue of 1.0 is invalid; want valid")
+		t.Error("float flag with DefaultValue of 1.0 is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "strings", DefaultValue: []string{}}); err != nil {
 		fmt.Println(err)
-		t.Error("strings dial with DefaultValue of []string{} is invalid; want valid")
+		t.Error("strings flag with DefaultValue of []string{} is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "ints", DefaultValue: []int{}}); err != nil {
 		fmt.Println(err)
-		t.Error("ints dial with DefaultValue of []int{} is invalid; want valid")
+		t.Error("ints flag with DefaultValue of []int{} is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "floats", DefaultValue: []float64{}}); err != nil {
@@ -141,12 +141,12 @@ func TestAdd(t *testing.T) {
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "strings", DefaultValue: []string{"test"}}); err != nil {
 		fmt.Println(err)
-		t.Error("strings dial with DefaultValue of []string{'test'} is invalid; want valid")
+		t.Error("strings flag with DefaultValue of []string{'test'} is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "ints", DefaultValue: []int{1}}); err != nil {
 		fmt.Println(err)
-		t.Error("ints dial with DefaultValue of []int{1} is invalid; want valid")
+		t.Error("ints flag with DefaultValue of []int{1} is invalid; want valid")
 	}
 	reset()
 	if err := Add(&Flag{Name: "test", ValueType: "floats", DefaultValue: []float64{1.0}}); err != nil {
@@ -160,7 +160,7 @@ func TestAdd(t *testing.T) {
 		log.Fatal(err)
 	}
 	if err := Add(&Flag{Name: "sljkdf", ValueType: "bool"}); err != nil {
-		t.Error("Add two dials with empty shorthand failed; wanted success")
+		t.Error("Add two flags with empty shorthand failed; wanted success")
 	}
 
 	// Duplicates
@@ -168,13 +168,13 @@ func TestAdd(t *testing.T) {
 		log.Fatal(err)
 	}
 	if err := Add(&Flag{Name: "test", ValueType: "string", DefaultValue: ""}); err == nil {
-		t.Error("Add dial with duplicate name was successful; wanted failure")
+		t.Error("Add flag with duplicate name was successful; wanted failure")
 	}
 	if err := Add(&Flag{Name: "abc", Shorthand: "a", ValueType: "bool"}); err != nil {
 		log.Fatal(err)
 	}
 	if err := Add(&Flag{Name: "def", Shorthand: "a", ValueType: "string", DefaultValue: ""}); err == nil {
-		t.Error("Add dial with duplicate shorthand was successful; wanted failure")
+		t.Error("Add flag with duplicate shorthand was successful; wanted failure")
 	}
 
 	// Values
@@ -182,13 +182,13 @@ func TestAdd(t *testing.T) {
 		log.Fatal(err)
 	}
 	if values["mybool"] != false {
-		t.Error("bool dial with true default value had an actual value of true; wanted false")
+		t.Error("bool flag with true default value had an actual value of true; wanted false")
 	}
 	if err := Add(&Flag{Name: "mystring", ValueType: "string", DefaultValue: "my value"}); err != nil {
 		log.Fatal(err)
 	}
 	if values["mystring"] != "my value" {
-		t.Error("value for string dial did not match default value")
+		t.Error("value for string flag did not match default value")
 	}
 
 	// Empty values
