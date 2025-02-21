@@ -271,12 +271,19 @@ func parseArgs(args ...string) error {
 	}
 
 	needValueForName := ""
+	asPositionals := false
 	for _, arg := range args[1:] {
-		if needValueForName != "" {
+		if asPositionals {
+			positionals = append(positionals, arg)
+		} else if needValueForName != "" {
 			if err := setStringValue(needValueForName, arg); err != nil {
 				return err
 			}
 			needValueForName = ""
+		} else if arg == "--" {
+			// "--" is a special flag that treats all of the remaining
+			// arguments as positional arguments
+			asPositionals = true
 		} else if strings.HasPrefix(arg, "--") {
 			name := arg[2:]
 

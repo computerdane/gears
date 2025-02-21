@@ -502,6 +502,21 @@ func TestLoad(t *testing.T) {
 		t.Error("setting my-str using args failed")
 	}
 
+	// "--" flag
+	configFiles = nil
+	values["my-bool"] = false
+	values["my-floats"] = []float64{}
+	os.Unsetenv("MY_BOOL")
+	os.Unsetenv("MY_FLOATS")
+	load("cmd", "-s", "arg", "--", "-b", "-f", "1.0")
+	if BoolValue("my-bool") != false || len(FloatValues("my-floats")) != 0 {
+		t.Error("-- flag is not preventing processing remaining args as flags")
+	}
+	args := Positionals()
+	if args[0] != "-b" || args[1] != "-f" || args[2] != "1.0" {
+		t.Error("positionals not collected after -- flag")
+	}
+
 	os.Remove(configPath)
 	os.Remove(config2Path)
 }
