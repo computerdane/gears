@@ -381,6 +381,7 @@ func AddHomeConfigFile(path string) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Println("Warning: Could not determine location of user home directory")
+		return
 	}
 
 	AddConfigFile(home + "/" + path)
