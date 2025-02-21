@@ -1,3 +1,3 @@
-module github.com/computerdane/dials
+module github.com/computerdane/gears
 
 go 1.23.5

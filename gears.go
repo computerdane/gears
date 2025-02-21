@@ -1,4 +1,4 @@
-package dials
+package gears
 
 import (
 	"encoding/json"
@@ -11,60 +11,60 @@ import (
 	"strings"
 )
 
-type Dial struct {
+type Flag struct {
 	Name         string
 	Shorthand    string
 	ValueType    string
 	DefaultValue any
 }
 
-var dials map[string]*Dial
+var flags map[string]*Flag
 var shorthandNames map[string]string
 var values map[string]any
 var positionals []string
 
 var configFiles []string
 
-func assertValid(dial *Dial) error {
+func assertValid(flag *Flag) error {
 	re, err := regexp.Compile(`^([a-z]|[0-9]|-)+$`)
 	if err != nil {
 		log.Fatal("Error compiling regex: ", err)
 	}
-	if !re.MatchString(dial.Name) {
-		return fmt.Errorf("Dial name '%s' is invalid! Must be lowercase a-z with dashes only.", dial.Name)
+	if !re.MatchString(flag.Name) {
+		return fmt.Errorf("Flag name '%s' is invalid! Must be lowercase a-z with dashes only.", flag.Name)
 	}
 
 	re, err = regexp.Compile(`^([a-z]|[A-Z]|[0-9])?$`)
 	if err != nil {
 		log.Fatal("Error compiling regex: ", err)
 	}
-	if !re.MatchString(dial.Shorthand) {
-		return fmt.Errorf("Dial shorthand '%s' is invalid! Must be a single letter.", dial.Shorthand)
+	if !re.MatchString(flag.Shorthand) {
+		return fmt.Errorf("Flag shorthand '%s' is invalid! Must be a single letter.", flag.Shorthand)
 	}
 
-	if dial.ValueType != "bool" &&
-		dial.ValueType != "float" &&
-		dial.ValueType != "int" &&
-		dial.ValueType != "string" &&
-		dial.ValueType != "floats" &&
-		dial.ValueType != "ints" &&
-		dial.ValueType != "strings" {
-		return fmt.Errorf("Dial value type '%s' is invald! Must be one of: bool float int string floats ints strings.", dial.ValueType)
+	if flag.ValueType != "bool" &&
+		flag.ValueType != "float" &&
+		flag.ValueType != "int" &&
+		flag.ValueType != "string" &&
+		flag.ValueType != "floats" &&
+		flag.ValueType != "ints" &&
+		flag.ValueType != "strings" {
+		return fmt.Errorf("Flag value type '%s' is invald! Must be one of: bool float int string floats ints strings.", flag.ValueType)
 	}
 
-	if dial.ValueType == "bool" && dial.DefaultValue != nil {
-		log.Printf("Warning: You set a default value for the bool dial '%s'. It will be ignored, since bool dials always have a default value of false.\n", dial.Name)
+	if flag.ValueType == "bool" && flag.DefaultValue != nil {
+		log.Printf("Warning: You set a default value for the bool flag '%s'. It will be ignored, since bool flags always have a default value of false.\n", flag.Name)
 	}
-	if dial.ValueType != "bool" && dial.DefaultValue == nil {
-		return fmt.Errorf("Non-bool dial '%s' must have a default value.", dial.Name)
+	if flag.ValueType != "bool" && flag.DefaultValue == nil {
+		return fmt.Errorf("Non-bool flag '%s' must have a default value.", flag.Name)
 	}
 
 	return nil
 }
 
-func Add(dial *Dial) error {
-	if dials == nil {
-		dials = make(map[string]*Dial)
+func Add(flag *Flag) error {
+	if flags == nil {
+		flags = make(map[string]*Flag)
 	}
 	if shorthandNames == nil {
 		shorthandNames = make(map[string]string)
@@ -73,28 +73,28 @@ func Add(dial *Dial) error {
 		values = make(map[string]any)
 	}
 
-	if err := assertValid(dial); err != nil {
+	if err := assertValid(flag); err != nil {
 		return err
 	}
-	if _, exists := dials[dial.Name]; exists {
-		return fmt.Errorf("Dial with name '%s' already exists!", dial.Name)
+	if _, exists := flags[flag.Name]; exists {
+		return fmt.Errorf("Flag with name '%s' already exists!", flag.Name)
 	}
-	if dial.Shorthand != "" {
-		if _, exists := shorthandNames[dial.Shorthand]; exists {
-			return fmt.Errorf("Dial with shorthand '%s' already exists!", dial.Shorthand)
+	if flag.Shorthand != "" {
+		if _, exists := shorthandNames[flag.Shorthand]; exists {
+			return fmt.Errorf("Flag with shorthand '%s' already exists!", flag.Shorthand)
 		}
 	}
 
-	dials[dial.Name] = dial
-	if dial.Shorthand != "" {
-		shorthandNames[dial.Shorthand] = dial.Name
+	flags[flag.Name] = flag
+	if flag.Shorthand != "" {
+		shorthandNames[flag.Shorthand] = flag.Name
 	}
-	if dial.ValueType == "bool" {
-		if err := setValue(dial, false); err != nil {
+	if flag.ValueType == "bool" {
+		if err := setValue(flag, false); err != nil {
 			return err
 		}
 	} else {
-		if err := setValue(dial, dial.DefaultValue); err != nil {
+		if err := setValue(flag, flag.DefaultValue); err != nil {
 			return err
 		}
 	}
@@ -102,143 +102,143 @@ func Add(dial *Dial) error {
 	return nil
 }
 
-func setValue(dial *Dial, anyValue any) error {
-	switch dial.ValueType {
+func setValue(flag *Flag, anyValue any) error {
+	switch flag.ValueType {
 	case "bool":
 		value, ok := anyValue.(bool)
 		if !ok {
 			return fmt.Errorf("Value '%v' is not of type bool!", anyValue)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "float":
 		value, ok := anyValue.(float64)
 		if !ok {
 			return fmt.Errorf("Value '%v' is not of type float64!", anyValue)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "int":
 		value, ok := anyValue.(int)
 		if !ok {
 			return fmt.Errorf("Value '%v' is not of type int!", anyValue)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "string":
 		value, ok := anyValue.(string)
 		if !ok {
 			return fmt.Errorf("Value '%v' is not of type string!", anyValue)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "floats":
 		value, ok := anyValue.([]float64)
 		if !ok {
 			return fmt.Errorf("Value '%v' is not of type []float64!", anyValue)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "ints":
 		value, ok := anyValue.([]int)
 		if !ok {
 			return fmt.Errorf("Value '%v' is not of type []int!", anyValue)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "strings":
 		value, ok := anyValue.([]string)
 		if !ok {
 			return fmt.Errorf("Value '%v' is not of type []string!", anyValue)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	}
 
 	return nil
 }
 
-func setJsonValue(dial *Dial, raw json.RawMessage) error {
-	switch dial.ValueType {
+func setJsonValue(flag *Flag, raw json.RawMessage) error {
+	switch flag.ValueType {
 	case "bool":
 		var value bool
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return fmt.Errorf("JSON value '%s' is not of type bool!", string(raw))
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "float":
 		var value float64
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return fmt.Errorf("JSON value '%s' is not of type float64!", string(raw))
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "int":
 		var value int
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return fmt.Errorf("JSON value '%s' is not of type int!", string(raw))
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "string":
 		var value string
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return fmt.Errorf("JSON value '%s' is not of type string!", string(raw))
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "floats":
 		var value []float64
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return fmt.Errorf("JSON value '%s' is not of type []float64!", string(raw))
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "ints":
 		var value []int
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return fmt.Errorf("JSON value '%s' is not of type []int!", string(raw))
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "strings":
 		var value []string
 		if err := json.Unmarshal(raw, &value); err != nil {
 			return fmt.Errorf("JSON value '%s' is not of type []string!", string(raw))
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	}
 
 	return nil
 }
 
 func setStringValue(name string, str string) error {
-	dial, exists := dials[name]
+	flag, exists := flags[name]
 	if !exists {
-		log.Fatalf("Setting value for dial '%s', but dial doesn't exist!", name)
+		log.Fatalf("Setting value for flag '%s', but flag doesn't exist!", name)
 	}
 
-	switch dial.ValueType {
+	switch flag.ValueType {
 	case "bool":
 		log.Fatal("Should never need to parse a value for a bool flag!")
 	case "float":
 		value, err := strconv.ParseFloat(str, 64)
 		if err != nil {
-			return fmt.Errorf("Value for '%s' must be a float!", dial.Name)
+			return fmt.Errorf("Value for '%s' must be a float!", flag.Name)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "floats":
 		value, err := strconv.ParseFloat(str, 64)
 		if err != nil {
-			return fmt.Errorf("Value for '%s' must be a float!", dial.Name)
+			return fmt.Errorf("Value for '%s' must be a float!", flag.Name)
 		}
-		values[dial.Name] = append(values[dial.Name].([]float64), value)
+		values[flag.Name] = append(values[flag.Name].([]float64), value)
 	case "int":
 		value64, err := strconv.ParseInt(str, 10, 32)
 		value := int(value64)
 		if err != nil {
-			return fmt.Errorf("Value for '%s' must be an int!", dial.Name)
+			return fmt.Errorf("Value for '%s' must be an int!", flag.Name)
 		}
-		values[dial.Name] = value
+		values[flag.Name] = value
 	case "ints":
 		value64, err := strconv.ParseInt(str, 10, 32)
 		value := int(value64)
 		if err != nil {
-			return fmt.Errorf("Value for '%s' must be an int!", dial.Name)
+			return fmt.Errorf("Value for '%s' must be an int!", flag.Name)
 		}
-		values[dial.Name] = append(values[dial.Name].([]int), value)
+		values[flag.Name] = append(values[flag.Name].([]int), value)
 	case "string":
-		values[dial.Name] = str
+		values[flag.Name] = str
 	case "strings":
-		values[dial.Name] = append(values[dial.Name].([]string), str)
+		values[flag.Name] = append(values[flag.Name].([]string), str)
 	}
 
 	return nil
@@ -259,12 +259,12 @@ func parseArgs(args ...string) error {
 		} else if strings.HasPrefix(arg, "--") {
 			name := arg[2:]
 
-			dial, exists := dials[name]
+			flag, exists := flags[name]
 			if !exists {
 				return fmt.Errorf("Unknown flag: --%s", name)
 			}
 
-			if dial.ValueType == "bool" {
+			if flag.ValueType == "bool" {
 				values[name] = true
 			} else {
 				needValueForName = name
@@ -279,12 +279,12 @@ func parseArgs(args ...string) error {
 					return fmt.Errorf("Unknown flag: -%s", shorthand)
 				}
 
-				dial, exists := dials[name]
+				flag, exists := flags[name]
 				if !exists {
-					log.Fatalf("Shorthand '%s' exists, but dial '%s' does not!", shorthand, name)
+					log.Fatalf("Shorthand '%s' exists, but flag '%s' does not!", shorthand, name)
 				}
 
-				if dial.ValueType == "bool" {
+				if flag.ValueType == "bool" {
 					values[name] = true
 				} else if c != len(shorthands)-1 {
 					return fmt.Errorf("Invalid flag: -%s is unable to set -%s", shorthands, shorthand)
@@ -307,11 +307,11 @@ func parseJson(data []byte) error {
 	}
 
 	for name, raw := range config {
-		dial, exists := dials[name]
+		flag, exists := flags[name]
 		if !exists {
 			return fmt.Errorf("Invalid JSON: Option '%s' does not exist.", name)
 		}
-		if err := setJsonValue(dial, raw); err != nil {
+		if err := setJsonValue(flag, raw); err != nil {
 			return err
 		}
 	}
@@ -320,12 +320,12 @@ func parseJson(data []byte) error {
 }
 
 func getValue[T bool | float64 | int | string | []float64 | []int | []string](name string, valueType string) T {
-	dial, exists := dials[name]
+	flag, exists := flags[name]
 	if !exists {
-		log.Fatalf("Dial '%s' does not exist!", name)
+		log.Fatalf("Flag '%s' does not exist!", name)
 	}
-	if dial.ValueType != valueType {
-		log.Fatalf("Dial '%s' is not of type %s!", name, valueType)
+	if flag.ValueType != valueType {
+		log.Fatalf("Flag '%s' is not of type %s!", name, valueType)
 	}
 	if values[name] == nil {
 		log.Fatalf("Value for '%s' not found!", name)
@@ -412,19 +412,19 @@ func load(args ...string) {
 	}
 
 	// 2. Environment variables
-	for _, dial := range dials {
-		if dial.ValueType == "floats" ||
-			dial.ValueType == "ints" ||
-			dial.ValueType == "strings" {
+	for _, flag := range flags {
+		if flag.ValueType == "floats" ||
+			flag.ValueType == "ints" ||
+			flag.ValueType == "strings" {
 			// TODO: support comma-separated environment variables
 			continue
 		}
-		envVar := toEnvVar(dial.Name)
+		envVar := toEnvVar(flag.Name)
 		value, exists := os.LookupEnv(envVar)
 		if exists {
-			if dial.ValueType == "bool" {
-				values[dial.Name] = true
-			} else if err := setStringValue(dial.Name, value); err != nil {
+			if flag.ValueType == "bool" {
+				values[flag.Name] = true
+			} else if err := setStringValue(flag.Name, value); err != nil {
 				log.Fatal(err)
 			}
 		}
