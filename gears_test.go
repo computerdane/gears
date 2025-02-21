@@ -426,7 +426,7 @@ func TestLoad(t *testing.T) {
 	if err := Add(&Flag{Name: "my-bool", Shorthand: "b", ValueType: "bool"}); err != nil {
 		log.Fatal(err)
 	}
-	if err := Add(&Flag{Name: "my-floats", Shorthand: "f", ValueType: "floats", DefaultValue: []float64{}}); err != nil {
+	if err := Add(&Flag{Name: "my-floats", Shorthand: "f", ValueType: "floats", DefaultValue: []float64{}, EnvVarDelimiter: ","}); err != nil {
 		log.Fatal(err)
 	}
 
@@ -484,6 +484,15 @@ func TestLoad(t *testing.T) {
 	load()
 	if BoolValue("my-bool") != false {
 		t.Error("unsetting my-bool using environment failed")
+	}
+
+	values = make(map[string]any)
+	configFiles = nil
+	os.Setenv("MY_FLOATS", "2.0,3.0")
+	load()
+	myFloats = FloatValues("my-floats")
+	if myFloats[0] != 2.0 || myFloats[1] != 3.0 {
+		t.Error("setting my-floats using JSON config failed")
 	}
 
 	// Args

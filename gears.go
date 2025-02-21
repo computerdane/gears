@@ -12,10 +12,11 @@ import (
 )
 
 type Flag struct {
-	Name         string
-	Shorthand    string
-	ValueType    string
-	DefaultValue any
+	Name            string
+	Shorthand       string
+	ValueType       string
+	DefaultValue    any
+	EnvVarDelimiter string
 }
 
 var flags map[string]*Flag
@@ -228,7 +229,11 @@ func setStringValue(name string, str string) error {
 		if err != nil {
 			return fmt.Errorf("Value for '%s' must be a float!", flag.Name)
 		}
-		values[flag.Name] = append(values[flag.Name].([]float64), value)
+		if values[flag.Name] == nil {
+			values[flag.Name] = []float64{value}
+		} else {
+			values[flag.Name] = append(values[flag.Name].([]float64), value)
+		}
 	case "int":
 		value64, err := strconv.ParseInt(str, 10, 32)
 		value := int(value64)
@@ -242,11 +247,19 @@ func setStringValue(name string, str string) error {
 		if err != nil {
 			return fmt.Errorf("Value for '%s' must be an int!", flag.Name)
 		}
-		values[flag.Name] = append(values[flag.Name].([]int), value)
+		if values[flag.Name] == nil {
+			values[flag.Name] = []int{value}
+		} else {
+			values[flag.Name] = append(values[flag.Name].([]int), value)
+		}
 	case "string":
 		values[flag.Name] = str
 	case "strings":
-		values[flag.Name] = append(values[flag.Name].([]string), str)
+		if values[flag.Name] == nil {
+			values[flag.Name] = []string{str}
+		} else {
+			values[flag.Name] = append(values[flag.Name].([]string), str)
+		}
 	}
 
 	return nil
@@ -422,15 +435,21 @@ func load(args ...string) {
 
 	// 2. Environment variables
 	for _, flag := range flags {
-		if flag.ValueType == "floats" ||
-			flag.ValueType == "ints" ||
-			flag.ValueType == "strings" {
-			// TODO: support comma-separated environment variables
-			continue
-		}
 		envVar := toEnvVar(flag.Name)
 		value, exists := os.LookupEnv(envVar)
 		if exists {
+			if flag.ValueType == "floats" ||
+				flag.ValueType == "ints" ||
+				flag.ValueType == "strings" {
+				if flag.EnvVarDelimiter != "" {
+					for _, s := range strings.Split(value, flag.EnvVarDelimiter) {
+						if err := setStringValue(flag.Name, s); err != nil {
+							log.Fatal(err)
+						}
+					}
+				}
+				continue
+			}
 			if flag.ValueType == "bool" {
 				values[flag.Name] = true
 			} else if err := setStringValue(flag.Name, value); err != nil {
