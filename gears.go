@@ -151,6 +151,14 @@ func setValue(flag *Flag, anyValue any) error {
 	return nil
 }
 
+func SetValue(name string, value any) {
+	flag, exists := flags[name]
+	if !exists {
+		log.Fatalf("Flag '%s' does not exist!", name)
+	}
+	setValue(flag, value)
+}
+
 func setJsonValue(flag *Flag, raw json.RawMessage) error {
 	switch flag.ValueType {
 	case "bool":
