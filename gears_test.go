@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func reset() {
+func tests_reset() {
 	flags = nil
 	shorthandNames = nil
 	values = nil
@@ -74,86 +74,86 @@ func TestAssertValid(t *testing.T) {
 
 func TestAdd(t *testing.T) {
 	// Default values
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "string", DefaultValue: 1}); err == nil {
 		t.Error("string flag with DefaultValue of 1 is valid; want invalid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "int", DefaultValue: 1.0}); err == nil {
 		t.Error("int flag with DefaultValue of 1.0 is valid; want invalid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "float", DefaultValue: 1}); err == nil {
 		t.Error("float flag with DefaultValue of 1 is valid; want invalid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "strings", DefaultValue: "value"}); err == nil {
 		t.Error("strings flag with DefaultValue of 'value' is valid; want invalid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "ints", DefaultValue: 1}); err == nil {
 		t.Error("ints flag with DefaultValue of 1 is valid; want invalid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "floats", DefaultValue: 1.0}); err == nil {
 		t.Error("floats flag with DefaultValue of 1.0 is valid; want invalid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "bool"}); err != nil {
 		fmt.Println(err)
 		t.Error("bool flag with no DefaultValue is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "string", DefaultValue: ""}); err != nil {
 		fmt.Println(err)
 		t.Error("string flag with DefaultValue of '' is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "string", DefaultValue: "test value"}); err != nil {
 		fmt.Println(err)
 		t.Error("string flag with DefaultValue of 'test value' is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "int", DefaultValue: 1}); err != nil {
 		fmt.Println(err)
 		t.Error("int flag with DefaultValue of 1 is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "float", DefaultValue: 1.0}); err != nil {
 		fmt.Println(err)
 		t.Error("float flag with DefaultValue of 1.0 is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "strings", DefaultValue: []string{}}); err != nil {
 		fmt.Println(err)
 		t.Error("strings flag with DefaultValue of []string{} is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "ints", DefaultValue: []int{}}); err != nil {
 		fmt.Println(err)
 		t.Error("ints flag with DefaultValue of []int{} is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "floats", DefaultValue: []float64{}}); err != nil {
 		fmt.Println(err)
 		t.Error("floats with DefaultValue of []float64{} is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "strings", DefaultValue: []string{"test"}}); err != nil {
 		fmt.Println(err)
 		t.Error("strings flag with DefaultValue of []string{'test'} is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "ints", DefaultValue: []int{1}}); err != nil {
 		fmt.Println(err)
 		t.Error("ints flag with DefaultValue of []int{1} is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 	if err := Add(&Flag{Name: "test", ValueType: "floats", DefaultValue: []float64{1.0}}); err != nil {
 		fmt.Println(err)
 		t.Error("floats with DefaultValue of []float64{1.0} is invalid; want valid")
 	}
-	reset()
+	tests_reset()
 
 	// Empty shorthand
 	if err := Add(&Flag{Name: "alsdjkf", ValueType: "bool"}); err != nil {
@@ -263,7 +263,7 @@ func TestSetStringValue(t *testing.T) {
 }
 
 func TestParseArgs(t *testing.T) {
-	reset()
+	tests_reset()
 
 	if err := Add(&Flag{Name: "mybool-a", Shorthand: "a", ValueType: "bool"}); err != nil {
 		log.Fatal(err)
@@ -418,7 +418,7 @@ func TestParseArgs(t *testing.T) {
 }
 
 func TestLoad(t *testing.T) {
-	reset()
+	tests_reset()
 
 	if err := Add(&Flag{Name: "my-str", Shorthand: "s", ValueType: "string", DefaultValue: ""}); err != nil {
 		log.Fatal(err)

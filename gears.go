@@ -12,11 +12,13 @@ import (
 )
 
 type Flag struct {
-	Name            string
-	Shorthand       string
-	ValueType       string
-	DefaultValue    any
-	EnvVarDelimiter string
+	Name             string
+	Shorthand        string
+	ValueType        string
+	DefaultValue     any
+	EnvVarDelimiter  string
+	Description      string
+	ExcludeFromUsage bool
 }
 
 var flags map[string]*Flag
