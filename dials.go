@@ -356,7 +356,9 @@ func load(args ...string) {
 				log.Printf("Failed to read file: %s\n", err)
 			}
 
-			parseJson(data)
+			if err := parseJson(data); err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
